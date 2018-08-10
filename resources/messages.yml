@@ -1,0 +1,18 @@
+---
+prefix: "§7[§aI§6R§7]§r "
+server-whitelisted: "§l§7[§cMAINTENANCE§7]\n §eThis server is currently on maintenance mode!\n§eSorry for inconvience and please be patient!"
+join-notice: "§bThis server is running the Implactor!"
+###
+# The player name goes after all these
+join-message-op: "§7(§6STAFF§7) §l§8[§a+§8]§r §a"
+join-message: ""§l§8[§a+§8]§r §a"
+quit-message-op: "§7(§6STAFF§7) §l§8[§c-§8]§r §c"
+quit-message: "§l§8[§c-§8]§r §c"
+###
+message-on-death: "§cMove like pain, be steady like a death!"
+death-by-player-message: "§6×KILLER× §fhas slained §c×INNOCENT× §fwith using §b×WEAPON× §fand got §a×MONEY× §fin-game money!"
+respawn-title: "§l§cYOU ARE DEAD", "§fOuch, what just happend?"
+fast-chatting-message: "§l§8(§6!§8)§r §6Please wait before you chat again in few seconds!"
+fly-disabled-damage-message: "§cYour fly mode have been disabled because you suffered damaged!"
+bot-prefix-name: "§7[§bBot§7]§r\n§f"
+...

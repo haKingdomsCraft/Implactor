@@ -67,7 +67,9 @@ use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Color as Rainbow;
 use Exception as Unknown;
-use pocketmine\utils\Utils;
+use pocketmine\utils\{
+	Utils, Config
+};
 
 use Implactor\listeners\{
 	AntiAdvertising, AntiSwearing, AntiCaps, BotListener
@@ -93,7 +95,6 @@ class Implade extends PluginBase implements Listener {
 	    public $timers = array();
         public $wild = [];
         public $ichat = [];
-        public $impladePrefix = "§7[§aI§6R§7]§r ";
         private $visibility = [];
         
         public function onLoad(): void{
@@ -111,16 +112,20 @@ class Implade extends PluginBase implements Listener {
         }
         
         public function onEnable(): void{
-        	$this->getLogger()->info("Implactor is currently now online! Thanks for using this plugin!");
-            $this->getScheduler()->scheduleRepeatingTask(new SpawnParticles($this, $this), 15);       
-            $this->getServer()->getPluginManager()->registerEvents($this, $this);
-            $this->getLogger()->info("Implactor is licensed under GNU General Public License v3.0");
-            $this->checkDepends();
-            $this->checkTridents();      
-            $this->checkEntities();
-            $this->checkListeners();
-            $this->autoClearLagg();
-        }
+		$this->getLogger()->info("Implactor is currently now online! Thanks for using this plugin!");
+		$this->getScheduler()->scheduleRepeatingTask(new SpawnParticles($this, $this), 15);
+		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+		$this->getLogger()->info("Implactor is licensed under GNU General Public License v3.0");
+		@mkdir($this->getDataFolder());
+		$this->saveResource("messages.yml")
+		$this->config = new Config($this->getDataFolder()."messages.yml", Config::YAML);
+		$this->impladePrefix = $this->config->get("prefix");
+		$this->checkDepends();
+		$this->checkTridents();      
+		$this->checkEntities();
+		$this->checkListeners();
+		$this->autoClearLagg();
+	}
         
         public function checkDepends(): void{
         	$this->getLogger()->info("Checking all depends from Implactor...");
@@ -135,24 +140,24 @@ class Implade extends PluginBase implements Listener {
             	$this->getLogger()->warning("EconomyAPI not found in plugins folder! Disabling the money killer feature!");
             }
         }
-        
-        private function checkTridents(){
+
+	private function checkTridents(){
         	$this->getLogger()->info("Checking all Mysterious Legendary Trident files from Implactor...");
         	TridentEntityManager::init();
-            TridentItemManager::init();
+		TridentItemManager::init();
         }
         
-        public function checkEntities(){
-        	Entity::registerEntity(DeathHuman::class, true);
-            Entity::registerEntity(BotHuman::class, true);
-            Entity::registerEntity(SoccerSlime::class, true);
-        }     
+	public function checkEntities(){
+		Entity::registerEntity(DeathHuman::class, true);
+		Entity::registerEntity(BotHuman::class, true);
+		Entity::registerEntity(SoccerSlime::class, true);
+	}
         
         public function checkListeners(){
-        	$this->getServer()->getPluginManager()->registerEvents(new AntiAdvertising($this), $this);
-            $this->getServer()->getPluginManager()->registerEvents(new AntiSwearing($this), $this);
-            $this->getServer()->getPluginManager()->registerEvents(new AntiCaps($this), $this);
-            $this->getServer()->getPluginManager()->registerEvents(new BotListener($this), $this);          
+		$this->getServer()->getPluginManager()->registerEvents(new AntiAdvertising($this), $this);
+		$this->getServer()->getPluginManager()->registerEvents(new AntiSwearing($this), $this);
+		$this->getServer()->getPluginManager()->registerEvents(new AntiCaps($this), $this);
+		$this->getServer()->getPluginManager()->registerEvents(new BotListener($this), $this);          
         }
         
         public function autoClearLagg(){
@@ -163,33 +168,33 @@ class Implade extends PluginBase implements Listener {
         
         public function onDisable(): void{
         	$this->getLogger()->notice("Oh no, Implactor has self-destructed it's system and now finally closed!");
-            $this->getScheduler()->cancelAllTasks();
+		$this->getScheduler()->cancelAllTasks();
         }
         
         public function onPreLogin(PlayerPreLoginEvent $ev): void{
         	$player = $ev->getPlayer();
             if(!$this->getServer()->isWhitelisted($player->getName())){
-            	$ev->setKickMessage("§l§7[§cMAINTENANCE§7]\n §eThis server is currently on maintenance mode!\n§eSorry for inconvience and please be patient!");
+            	$ev->setKickMessage($this->config->get("server-whitelisted"));
                 $ev->setCancelled(true);
              }
         }
-        
-        public function onLogin(PlayerLoginEvent $ev): void{
-        	$player = $ev->getPlayer();
-            $spawn = $this->getServer()->getDefaultLevel()->getSafeSpawn();
-		    $player->teleport($spawn);
+
+	public function onLogin(PlayerLoginEvent $ev): void{
+		$player = $ev->getPlayer();
+		$spawn = $this->getServer()->getDefaultLevel()->getSafeSpawn();
+		$player->teleport($spawn);
         }
         
         public function onJoin(PlayerJoinEvent $ev): void{
         	$player = $ev->getPlayer();
-            $player->sendMessage($this->impladePrefix. "§bThis server is running the Implactor!");
+            $player->sendMessage($this->impladePrefix. $this->config->get("join-notice"));
             $player->setGamemode(Player::SURVIVAL);
 	        $this->getScheduler()->scheduleDelayedTask(new GuardianJoinTask($this, $player), 25);
 	      if($player->isOP()){
-		      $ev->setJoinMessage("§7(§6STAFF§7) §l§8[§a+§8]§r §a{$player->getName()}");
+		      $ev->setJoinMessage($this->config->get("join-message-op").$player->getName());
 			  $player->getLevel()->addSound(new Join($player));
 		   }else{
-			  $ev->setJoinMessage("§l§8[§a+§8]§r §a{$player->getName()}");
+			  $ev->setJoinMessage($this->config->get("join-message").$player->getName());
 			  $player->getLevel()->addSound(new Join($player));
 			}
 			if(!in_array($player->getName(), $this->rainbows)){
@@ -208,7 +213,7 @@ class Implade extends PluginBase implements Listener {
             $level = $player->getLevel();
             $level->addSound(new DeathOne($player));
             $level->addSound(new DeathTwo($player));
-            $player->sendMessage($this->impladePrefix. "§cMove like pain, be steady like a death!");
+            $player->sendMessage($this->impladePrefix. $this->config->get("message-on-death"));
             $this->getScheduler()->scheduleDelayedTask(new DeathParticles($this, $player), 1);
             if($player->getLastDamageCause() instanceof EntityDamageByEntityEvent){
             	if($player->getLastDamageCause()->getDamager() instanceof Player){
@@ -218,7 +223,7 @@ class Implade extends PluginBase implements Listener {
                          $this->getLogger()->error("There was a error problem with EconomyAPI! It failed to add money to the killer!");
                          return;
                         }
-                         $message = str_replace("×MONEY×", 250, "§6×KILLER× §fhas slained §c×INNOCENT× §fwith using §b×WEAPON× §fand got §a×MONEY× §fin-game money!");
+                         $message = str_replace("×MONEY×", 250, $this->config->get("death-by-player-message"));
                          $message = str_replace("×INNOCENT×", $player->getName(), $message);
                          $message = str_replace("×KILLER×", $playerKiller->getName(), $message);
                          $message = str_replace("×WEAPON×", $weaponKiller, $message);
@@ -251,12 +256,12 @@ class Implade extends PluginBase implements Listener {
 		    $this->getScheduler()->scheduleDelayedTask(new DeathHumanDespawnTask($this, $death, $player), 1300);
         }
         
-        public function onRespawn(PlayerRespawnEvent $ev): void{
-        	$player = $ev->getPlayer();
-            $player->setGamemode(Player::SURVIVAL);
-            $player->addTitle("§l§cYOU ARE DEAD", "§fOuch, what just happend?");
-            $this->getScheduler()->scheduleDelayedTask(new TotemRespawnTask($this, $player), 1);
-        }
+	public function onRespawn(PlayerRespawnEvent $ev): void{
+		$player = $ev->getPlayer();
+		$player->setGamemode(Player::SURVIVAL);
+		$player->addTitle($this->config->get("respawn-title"));
+		$this->getScheduler()->scheduleDelayedTask(new TotemRespawnTask($this, $player), 1);
+	}
         
         public function onMove(PlayerMoveEvent $ev): void{
         	$player = $ev->getPlayer();
@@ -267,7 +272,7 @@ class Implade extends PluginBase implements Listener {
 				switch($player->getDirection()){
 					case 0:
 					$entity->setMotion(new Vector3($speed, $speed / 4, 0));
-				    $entity->level->broadcastLevelSoundEvent($entity, BallSoundPacket::SOUND_POP);
+					$entity->level->broadcastLevelSoundEvent($entity, BallSoundPacket::SOUND_POP);
 					$entity->getLevel()->addParticle(new Ball($entity));
 					break;
 					case 1:
@@ -285,16 +290,16 @@ class Implade extends PluginBase implements Listener {
 					$entity->level->broadcastLevelSoundEvent($entity, BallSoundPacket::SOUND_POP);
 					$entity->getLevel()->addParticle(new Ball($entity));
 					break;
-					}
-			    }
-		    }
-        }
+				}
+			}
+		}
+	}
         
         public function onChat(PlayerChatEvent $ev): void{
         	$player = $ev->getPlayer();
             if(isset($this->ichat[$player->getName()])){
             	$ev->setCancelled(true);
-                $player->sendMessage("§l§8(§6!§8)§r §6Please wait before you chat again in few seconds!");
+                $player->sendMessage($this->config->get("fast-chatting-message"));
                }
                if(!$player->hasPermission("implactor.chatcooldown")){
                	$this->chat[$player->getName()] = true;
@@ -305,10 +310,10 @@ class Implade extends PluginBase implements Listener {
         public function onQuit(PlayerQuitEvent $ev): void{
         	$player = $ev->getPlayer();
             if($player->isOP()){
-			    $ev->setQuitMessage("§7(§6STAFF§7) §l§8[§c-§8]§r §c{$player->getName()}");
+			    $ev->setQuitMessage($this->config->get("quit-message-op").$player->getName());
 			    $player->getLevel()->addSound(new Quit($player));
              }else{
-			    $ev->setQuitMessage("§l§8[§c-§8]§r §c{$player->getName()}");
+			    $ev->setQuitMessage($this->config->get("quit-message").$player->getName());
 			    $player->getLevel()->addSound(new Quit($player));
 			}
         }
@@ -325,7 +330,7 @@ class Implade extends PluginBase implements Listener {
                            if($entity->getAllowFlight() == true){
                            	$entity->setFlying(false);
 					           $entity->setAllowFlight(false);
-					           $entity->sendMessage($this->impladePrefix. "§cYour fly mode have been disabled because you suffered damaged!");
+					           $entity->sendMessage($this->impladePrefix. $this->config->get("fly-disabled-damage-message"));
 					          }
 					}
 					if(isset($this->wild[$entity->getName()])){
@@ -341,10 +346,10 @@ class Implade extends PluginBase implements Listener {
         
         public function soccerBall(Player $player): void{
         	$soccerLevel = $player->getLevel();
-            $soccerNBT = Entity::createBaseNBT($player, null, 2, 2);
-		    $entitySoccer = new SoccerSlime($soccerLevel, $soccerNBT);
-		    $entitySoccer->setScale(1.6);
-		    $entitySoccer->spawnToAll();
+		$soccerNBT = Entity::createBaseNBT($player, null, 2, 2);
+		$entitySoccer = new SoccerSlime($soccerLevel, $soccerNBT);
+		$entitySoccer->setScale(1.6);
+		$entitySoccer->spawnToAll();
         }
         
         public function summonBot(Player $player, string $botname): void{
@@ -352,27 +357,27 @@ class Implade extends PluginBase implements Listener {
         	$botnbt = Entity::createBaseNBT($player, null, 2, 2);
 		    $botnbt->setTag($player->namedtag->getTag("Skin"));
 		    $bot = new BotHuman($level, $botnbt);
-		    $bot->setNameTag("§7[§bBot§7]§r\n§f" .$botname);
+		    $bot->setNameTag($this->config->get("bot-prefix-name") .$botname);
 		    $bot->setNameTagAlwaysVisible(true);
 		    $bot->spawnToAll();
         }
         
         public function implactorBook(Player $player): void{
         	$ibook = Item::get(Item::WRITTEN_BOOK, 0, 1);
-            $enchantment = Enchantment::getEnchantment(19);
-            $enchantInstance = new EnchantmentInstance($enchantment, 5); 
-			$ibook->addEnchantment($enchantInstance);
-		    $ibook->setTitle("§l§aBook §bof §cImplactor");
-		    $ibook->setPageText(0, "§4You are now reading on Book of Implactor!\n\n§0Created: §123 May 2018\nRemaked: §114 July 2018\n\n§0Author: §cZadezter\n§0Team: §cImpladeDeveloped\n\n\n§2This plugin and also a book are licensed under GNU General Public License v3.0!");
-		    $ibook->setPageText(1, "§3Implactor\n§2A elite plugin, more added features for Minecraft: Bedorck Edition servers!\n\n§4Thank you for using our plugin. If you have any bug issue, post on our issue at Github.\n\n§4Shall we get started? We added some informations!");
-		    $ibook->setPageText(2, "§5Bot Human\n§2A moving bot having a functional which can walk, swing, sneak/unsneak, particle and jump!\n\n§4This feature is a special for you, but there is little kind of annoying. But when the bot sees you, it will jump and walk to near you!");
-		    $ibook->setPageText(3, "§bTrident\n§2A deadly one shot kill weapon with enchantments!\n\n§dIn Aquatic Update, one of the mysterious legendary trident is from the sea and owned by the former holder, Posideon! Until now, it is appeared to Implactor with a impossible damages!");
-		    $ibook->setPageText(4, "§dWith this power on Trident, they can charge and fast when in the sea for trying to escape from opponents, auto return to their's holder after throwed far away and the impossible deadly one shot kill!\n§dThis is a extreme rarest item in-game server!");
-		    $ibook->setPageText(5, "§3Get a dangerous item from the sea. For staff who work on other servers, you can do some challanges and events for your players!\n\n§5- Zadezter\n§2P.S: Be a holder of Mysterious Legendary Trident and slain all opponents!");
-            $ibook->setPageText(6, "§bSoccer\n§2A sports and fun feature that you can kick a ball!\n\n§7A games for fun to play the soccer games! Whenever you do is, type /soccer in chat to spawn the, baby slime?! And let's go to get score §5GOAL§7!!!");
-            $ibook->setPageText(7, "§dRainbow Armor\n§2You can use /rainbow UI command to enable or disable your rainbow armor. It keep active when you re-joined the server!");
-		    $ibook->setAuthor("§l§eZadezter");
-		    $player->getInventory()->addItem($ibook);
+		$enchantment = Enchantment::getEnchantment(19);
+		$enchantInstance = new EnchantmentInstance($enchantment, 5);
+		$ibook->addEnchantment($enchantInstance);
+		$ibook->setTitle("§l§aBook §bof §cImplactor");
+		$ibook->setPageText(0, "§4You are now reading on Book of Implactor!\n\n§0Created: §123 May 2018\nRemaked: §114 July 2018\n\n§0Author: §cZadezter\n§0Team: §cImpladeDeveloped\n\n\n§2This plugin and also a book are licensed under GNU General Public License v3.0!");
+		$ibook->setPageText(1, "§3Implactor\n§2A elite plugin, more added features for Minecraft: Bedorck Edition servers!\n\n§4Thank you for using our plugin. If you have any bug issue, post on our issue at Github.\n\n§4Shall we get started? We added some informations!");
+		$ibook->setPageText(2, "§5Bot Human\n§2A moving bot having a functional which can walk, swing, sneak/unsneak, particle and jump!\n\n§4This feature is a special for you, but there is little kind of annoying. But when the bot sees you, it will jump and walk to near you!");
+		$ibook->setPageText(3, "§bTrident\n§2A deadly one shot kill weapon with enchantments!\n\n§dIn Aquatic Update, one of the mysterious legendary trident is from the sea and owned by the former holder, Posideon! Until now, it is appeared to Implactor with a impossible damages!");
+		$ibook->setPageText(4, "§dWith this power on Trident, they can charge and fast when in the sea for trying to escape from opponents, auto return to their's holder after throwed far away and the impossible deadly one shot kill!\n§dThis is a extreme rarest item in-game server!");
+		$ibook->setPageText(5, "§3Get a dangerous item from the sea. For staff who work on other servers, you can do some challanges and events for your players!\n\n§5- Zadezter\n§2P.S: Be a holder of Mysterious Legendary Trident and slain all opponents!");
+		$ibook->setPageText(6, "§bSoccer\n§2A sports and fun feature that you can kick a ball!\n\n§7A games for fun to play the soccer games! Whenever you do is, type /soccer in chat to spawn the, baby slime?! And let's go to get score §5GOAL§7!!!");
+		$ibook->setPageText(7, "§dRainbow Armor\n§2You can use /rainbow UI command to enable or disable your rainbow armor. It keep active when you re-joined the server!");
+		$ibook->setAuthor("§l§eZadezter");
+		$player->getInventory()->addItem($ibook);
         }
         
         public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool{
