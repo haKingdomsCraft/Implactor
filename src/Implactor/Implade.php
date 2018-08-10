@@ -30,6 +30,9 @@ use pocketmine\{
 use pocketmine\level\{
 	Level, Position
 };
+use pocketmine\utils\{
+	Utils, Config as ImpladeConfig
+};
 use pocketmine\plugin\{
 	Plugin, PluginBase, PluginDescription as ImplactorDescription
 };
@@ -67,9 +70,6 @@ use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Color as Rainbow;
 use Exception as Unknown;
-use pocketmine\utils\{
-	Utils, Config
-};
 
 use Implactor\listeners\{
 	AntiAdvertising, AntiSwearing, AntiCaps, BotListener
@@ -93,6 +93,9 @@ class Implade extends PluginBase implements Listener {
 	
 	    public $rainbows = array();
 	    public $timers = array();
+	    public $config;
+	    public $lang;
+	    public $impladePrefix = "§7[§aI§6R§7]§r ";
         public $wild = [];
         public $ichat = [];
         private $visibility = [];
@@ -115,11 +118,8 @@ class Implade extends PluginBase implements Listener {
 		$this->getLogger()->info("Implactor is currently now online! Thanks for using this plugin!");
 		$this->getScheduler()->scheduleRepeatingTask(new SpawnParticles($this, $this), 15);
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+		$this->configLanguage();
 		$this->getLogger()->info("Implactor is licensed under GNU General Public License v3.0");
-		@mkdir($this->getDataFolder());
-		$this->saveResource("messages.yml")
-		$this->config = new Config($this->getDataFolder()."messages.yml", Config::YAML);
-		$this->impladePrefix = $this->config->get("prefix");
 		$this->checkDepends();
 		$this->checkTridents();      
 		$this->checkEntities();
@@ -164,6 +164,36 @@ class Implade extends PluginBase implements Listener {
         	if(is_numeric(480)){  	
                 $this->getScheduler()->scheduleRepeatingTask(new ClearLaggTask($this, $this), 480 * 20);
              }
+        }
+
+        public function configLanguage() { 
+            if(!file_exists($this->getDataFolder())){ 
+                @mkdir($this->getDataFolder()); 
+            } 
+            if(!is_file($this->getDataFolder()."iConfig.yml")){ 
+                 $this->saveResource("iConfig.yml"); 
+            } 
+            if(!file_exists($this->getDataFolder()."languages/")){ 
+                @mkdir($this->getDataFolder()."languages/"); 
+            } 
+            if(!is_file($this->getDataFolder()."languages/English.yml")){ 
+                $this->saveResource("languages/English.yml"); 
+            } 
+            if(!is_file($this->getDataFolder() . "languages/Malay.yml")) {
+            $this->saveResource("languages/Malay.yml");
+            }
+            if(!is_file($this->getDataFolder()."languages/{$this->config->get('language')}.yml")){ 
+                $this->lang = new ImpladeConfig($this->getDataFolder()."languages/English.yml", Config::YAML); 
+                $this->getLogger()->info("[English] Selected language to English!"); 
+            }
+            if(!is_file($this->getDataFolder() . "languages/{$this->config->get('Language') }.yml")) {
+                $this->msg = new ImpladeConfig($this->getDataFolder() . "languages/Malay.yml", Config::YAML);
+                $this->getLogger()->info("[Malay] Bahasa Melayu telah dipilih!");
+               }
+            }else{ 
+                $this->lang = new ImpladeConfig($this->getDataFolder()."languages/{$this->config->get('language')}.yml", Config::YAML); 
+                $this->getLogger()->info("Successfully selected language to {$this->config->get('language')} on Implactor!"); 
+             } 
         }   	
         
         public function onDisable(): void{
@@ -174,7 +204,7 @@ class Implade extends PluginBase implements Listener {
         public function onPreLogin(PlayerPreLoginEvent $ev): void{
         	$player = $ev->getPlayer();
             if(!$this->getServer()->isWhitelisted($player->getName())){
-            	$ev->setKickMessage($this->config->get("server-whitelisted"));
+            	$ev->setKickMessage($this->getLang("server-whitelisted-message"));
                 $ev->setCancelled(true);
              }
         }
@@ -187,14 +217,14 @@ class Implade extends PluginBase implements Listener {
         
         public function onJoin(PlayerJoinEvent $ev): void{
         	$player = $ev->getPlayer();
-            $player->sendMessage($this->impladePrefix. $this->config->get("join-notice"));
+            $player->sendMessage($this->impladePrefix. $this->getLang("join-message-notice"));
             $player->setGamemode(Player::SURVIVAL);
 	        $this->getScheduler()->scheduleDelayedTask(new GuardianJoinTask($this, $player), 25);
 	      if($player->isOP()){
-		      $ev->setJoinMessage($this->config->get("join-message-op").$player->getName());
+		      $ev->setJoinMessage($this->getLang("join-message-operators") .$player->getName());
 			  $player->getLevel()->addSound(new Join($player));
 		   }else{
-			  $ev->setJoinMessage($this->config->get("join-message").$player->getName());
+			  $ev->setJoinMessage($this->getLang("join-message-players") .$player->getName());
 			  $player->getLevel()->addSound(new Join($player));
 			}
 			if(!in_array($player->getName(), $this->rainbows)){
@@ -213,7 +243,7 @@ class Implade extends PluginBase implements Listener {
             $level = $player->getLevel();
             $level->addSound(new DeathOne($player));
             $level->addSound(new DeathTwo($player));
-            $player->sendMessage($this->impladePrefix. $this->config->get("message-on-death"));
+            $player->sendMessage($this->impladePrefix. $this->getLang("death-message"));
             $this->getScheduler()->scheduleDelayedTask(new DeathParticles($this, $player), 1);
             if($player->getLastDamageCause() instanceof EntityDamageByEntityEvent){
             	if($player->getLastDamageCause()->getDamager() instanceof Player){
@@ -223,10 +253,10 @@ class Implade extends PluginBase implements Listener {
                          $this->getLogger()->error("There was a error problem with EconomyAPI! It failed to add money to the killer!");
                          return;
                         }
-                         $message = str_replace("Ã—MONEYÃ—", 250, $this->config->get("death-by-player-message"));
-                         $message = str_replace("Ã—INNOCENTÃ—", $player->getName(), $message);
-                         $message = str_replace("Ã—KILLERÃ—", $playerKiller->getName(), $message);
-                         $message = str_replace("Ã—WEAPONÃ—", $weaponKiller, $message);
+                         $message = str_replace("×MONEY×", 250, $this->getLang("death-money-message"));
+                         $message = str_replace("×INNOCENT×", $player->getName(), $message);
+                         $message = str_replace("×KILLER×", $playerKiller->getName(), $message);
+                         $message = str_replace("×WEAPON×", $weaponKiller, $message);
                          $player->getServer()->broadcastMessage($this->impladePrefix. $message);
                    }
             }
@@ -250,7 +280,7 @@ class Implade extends PluginBase implements Listener {
 		    $death = new DeathHuman($level, $deathNBT);
 		    $death->getDataPropertyManager()->setBlockPos(DeathHuman::DATA_PLAYER_BED_POSITION, new Vector3($player->getX(), $player->getY(), $player->getZ()));
 		    $death->setPlayerFlag(DeathHuman::DATA_PLAYER_FLAG_SLEEP, true);
-		    $death->setNameTag("Â§7[Â§cDeathÂ§7]Â§r\nÂ§f" .$player->getName());
+		    $death->setNameTag("§7[§cDeath§7]§r\n§f" .$player->getName());
 		    $death->setNameTagAlwaysVisible(true);
 		    $death->spawnToAll();
 		    $this->getScheduler()->scheduleDelayedTask(new DeathHumanDespawnTask($this, $death, $player), 1300);
@@ -259,7 +289,7 @@ class Implade extends PluginBase implements Listener {
 	public function onRespawn(PlayerRespawnEvent $ev): void{
 		$player = $ev->getPlayer();
 		$player->setGamemode(Player::SURVIVAL);
-		$player->addTitle($this->config->get("respawn-title"));
+		$player->addTitle($this->getLang("respawn-title"));
 		$this->getScheduler()->scheduleDelayedTask(new TotemRespawnTask($this, $player), 1);
 	}
         
@@ -299,7 +329,7 @@ class Implade extends PluginBase implements Listener {
         	$player = $ev->getPlayer();
             if(isset($this->ichat[$player->getName()])){
             	$ev->setCancelled(true);
-                $player->sendMessage($this->config->get("fast-chatting-message"));
+                $player->sendMessage($this->getLang("fast-chatting-message"));
                }
                if(!$player->hasPermission("implactor.chatcooldown")){
                	$this->chat[$player->getName()] = true;
@@ -310,10 +340,10 @@ class Implade extends PluginBase implements Listener {
         public function onQuit(PlayerQuitEvent $ev): void{
         	$player = $ev->getPlayer();
             if($player->isOP()){
-			    $ev->setQuitMessage($this->config->get("quit-message-op").$player->getName());
+			    $ev->setQuitMessage($this->getLang("quit-message-operators") .$player->getName());
 			    $player->getLevel()->addSound(new Quit($player));
              }else{
-			    $ev->setQuitMessage($this->config->get("quit-message").$player->getName());
+			    $ev->setQuitMessage($this->getLang("quit-message-players") .$player->getName());
 			    $player->getLevel()->addSound(new Quit($player));
 			}
         }
@@ -330,7 +360,7 @@ class Implade extends PluginBase implements Listener {
                            if($entity->getAllowFlight() == true){
                            	$entity->setFlying(false);
 					           $entity->setAllowFlight(false);
-					           $entity->sendMessage($this->impladePrefix. $this->config->get("fly-disabled-damage-message"));
+					           $entity->sendMessage($this->impladePrefix. $this->getLang("fly-disabled-damage-message"));
 					          }
 					}
 					if(isset($this->wild[$entity->getName()])){
@@ -357,7 +387,7 @@ class Implade extends PluginBase implements Listener {
         	$botnbt = Entity::createBaseNBT($player, null, 2, 2);
 		    $botnbt->setTag($player->namedtag->getTag("Skin"));
 		    $bot = new BotHuman($level, $botnbt);
-		    $bot->setNameTag($this->config->get("bot-prefix-name") .$botname);
+		    $bot->setNameTag("§7[§bBot§7]§r\n§f" .$botname);
 		    $bot->setNameTagAlwaysVisible(true);
 		    $bot->spawnToAll();
         }
@@ -367,16 +397,16 @@ class Implade extends PluginBase implements Listener {
 		$enchantment = Enchantment::getEnchantment(19);
 		$enchantInstance = new EnchantmentInstance($enchantment, 5);
 		$ibook->addEnchantment($enchantInstance);
-		$ibook->setTitle("Â§lÂ§aBook Â§bof Â§cImplactor");
-		$ibook->setPageText(0, "Â§4You are now reading on Book of Implactor!\n\nÂ§0Created: Â§123 May 2018\nRemaked: Â§114 July 2018\n\nÂ§0Author: Â§cZadezter\nÂ§0Team: Â§cImpladeDeveloped\n\n\nÂ§2This plugin and also a book are licensed under GNU General Public License v3.0!");
-		$ibook->setPageText(1, "Â§3Implactor\nÂ§2A elite plugin, more added features for Minecraft: Bedorck Edition servers!\n\nÂ§4Thank you for using our plugin. If you have any bug issue, post on our issue at Github.\n\nÂ§4Shall we get started? We added some informations!");
-		$ibook->setPageText(2, "Â§5Bot Human\nÂ§2A moving bot having a functional which can walk, swing, sneak/unsneak, particle and jump!\n\nÂ§4This feature is a special for you, but there is little kind of annoying. But when the bot sees you, it will jump and walk to near you!");
-		$ibook->setPageText(3, "Â§bTrident\nÂ§2A deadly one shot kill weapon with enchantments!\n\nÂ§dIn Aquatic Update, one of the mysterious legendary trident is from the sea and owned by the former holder, Posideon! Until now, it is appeared to Implactor with a impossible damages!");
-		$ibook->setPageText(4, "Â§dWith this power on Trident, they can charge and fast when in the sea for trying to escape from opponents, auto return to their's holder after throwed far away and the impossible deadly one shot kill!\nÂ§dThis is a extreme rarest item in-game server!");
-		$ibook->setPageText(5, "Â§3Get a dangerous item from the sea. For staff who work on other servers, you can do some challanges and events for your players!\n\nÂ§5- Zadezter\nÂ§2P.S: Be a holder of Mysterious Legendary Trident and slain all opponents!");
-		$ibook->setPageText(6, "Â§bSoccer\nÂ§2A sports and fun feature that you can kick a ball!\n\nÂ§7A games for fun to play the soccer games! Whenever you do is, type /soccer in chat to spawn the, baby slime?! And let's go to get score Â§5GOALÂ§7!!!");
-		$ibook->setPageText(7, "Â§dRainbow Armor\nÂ§2You can use /rainbow UI command to enable or disable your rainbow armor. It keep active when you re-joined the server!");
-		$ibook->setAuthor("Â§lÂ§eZadezter");
+		$ibook->setTitle("§l§aBook §bof §cImplactor");
+		$ibook->setPageText(0, "§4You are now reading on Book of Implactor!\n\n§0Created: §123 May 2018\nRemaked: §114 July 2018\n\n§0Author: §cZadezter\n§0Team: §cImpladeDeveloped\n\n\n§2This plugin and also a book are licensed under GNU General Public License v3.0!");
+		$ibook->setPageText(1, "§3Implactor\n§2A elite plugin, more added features for Minecraft: Bedorck Edition servers!\n\n§4Thank you for using our plugin. If you have any bug issue, post on our issue at Github.\n\n§4Shall we get started? We added some informations!");
+		$ibook->setPageText(2, "§5Bot Human\n§2A moving bot having a functional which can walk, swing, sneak/unsneak, particle and jump!\n\n§4This feature is a special for you, but there is little kind of annoying. But when the bot sees you, it will jump and walk to near you!");
+		$ibook->setPageText(3, "§bTrident\n§2A deadly one shot kill weapon with enchantments!\n\n§dIn Aquatic Update, one of the mysterious legendary trident is from the sea and owned by the former holder, Posideon! Until now, it is appeared to Implactor with a impossible damages!");
+		$ibook->setPageText(4, "§dWith this power on Trident, they can charge and fast when in the sea for trying to escape from opponents, auto return to their's holder after throwed far away and the impossible deadly one shot kill!\n§dThis is a extreme rarest item in-game server!");
+		$ibook->setPageText(5, "§3Get a dangerous item from the sea. For staff who work on other servers, you can do some challanges and events for your players!\n\n§5- Zadezter\n§2P.S: Be a holder of Mysterious Legendary Trident and slain all opponents!");
+		$ibook->setPageText(6, "§bSoccer\n§2A sports and fun feature that you can kick a ball!\n\n§7A games for fun to play the soccer games! Whenever you do is, type /soccer in chat to spawn the, baby slime?! And let's go to get score §5GOAL§7!!!");
+		$ibook->setPageText(7, "§dRainbow Armor\n§2You can use /rainbow UI command to enable or disable your rainbow armor. It keep active when you re-joined the server!");
+		$ibook->setAuthor("§l§eZadezter");
 		$player->getInventory()->addItem($ibook);
         }
         
@@ -385,39 +415,39 @@ class Implade extends PluginBase implements Listener {
         	    if($sender instanceof Player){
 		            if($sender->hasPermission("implactor.command.help")){
                         if(count($args) == 0){
-			                $sender->sendMessage("Â§8Â§l(Â§6!Â§8)Â§r Â§cCommand usageÂ§8:Â§rÂ§7 /ihelp Â§e[1-4]");
+			                $sender->sendMessage("§8§l(§6!§8)§r §cCommand usage§8:§r§7 /ihelp §e[1-4]");
                          }else{
 			                 if(count($args) == 1){
                                  switch($args[0]){
 			                     case "1":
-			                     $sender->sendMessage("Â§b--(Â§a Implactor Help Â§7[Â§e1-4Â§7] Â§b)--");
-			                     $sender->sendMessage("Â§e/ihelp Â§9- Â§fCheck all commands list available!");
-			                     $sender->sendMessage("Â§e/iabout Â§9- Â§fCheck about Implactor!");
-			                     $sender->sendMessage("Â§e/ping Â§9- Â§fPing your connection in-game server!");
-			                     $sender->sendMessage("Â§e/bot Â§9- Â§fSpawn the Â§bbot humanÂ§f by open a UI menu!");
-			                     $sender->sendMessage("Â§e/icast Â§9- Â§fBroadcast your message to all online players!");
+			                     $sender->sendMessage("§b--(§a Implactor Help §7[§e1-4§7] §b)--");
+			                     $sender->sendMessage("§e/ihelp §9- §fCheck all commands list available!");
+			                     $sender->sendMessage("§e/iabout §9- §fCheck about Implactor!");
+			                     $sender->sendMessage("§e/ping §9- §fPing your connection in-game server!");
+			                     $sender->sendMessage("§e/bot §9- §fSpawn the §bbot human§f by open a UI menu!");
+			                     $sender->sendMessage("§e/icast §9- §fBroadcast your message to all online players!");
 			                     break;
 			                     case "2":
-			                     $sender->sendMessage("Â§b--(Â§a Implactor Help Â§7[Â§e2-4Â§7] Â§b)--");
-			                     $sender->sendMessage("Â§e/wild Â§9- Â§fTeleport to a random spot of wilderness!");
-			                     $sender->sendMessage("Â§e/pvisible Â§9- Â§fOpen the player visibility menu UI!");
-			                     $sender->sendMessage("Â§e/vision Â§9- Â§fOpen the vision menu UI!");
-			                     $sender->sendMessage("Â§e/ibook Â§9- Â§fGet a book of Â§6ImplactorÂ§f!");
-			                     $sender->sendMessage("Â§e/gms Â§9- Â§fChange the gamemode to Â§cÂ§lSURVIVAL");
+			                     $sender->sendMessage("§b--(§a Implactor Help §7[§e2-4§7] §b)--");
+			                     $sender->sendMessage("§e/wild §9- §fTeleport to a random spot of wilderness!");
+			                     $sender->sendMessage("§e/pvisible §9- §fOpen the player visibility menu UI!");
+			                     $sender->sendMessage("§e/vision §9- §fOpen the vision menu UI!");
+			                     $sender->sendMessage("§e/ibook §9- §fGet a book of §6Implactor§f!");
+			                     $sender->sendMessage("§e/gms §9- §fChange the gamemode to §c§lSURVIVAL");
 			                     break;
 			                     case "3":
-			                     $sender->sendMessage("Â§b--(Â§a Implactor Help Â§7[Â§e3-4Â§7] Â§b)--");
-			                     $sender->sendMessage("Â§e/gmc Â§9- Â§fChange the gamemode to Â§eÂ§lCREATIVE");
-			                     $sender->sendMessage("Â§e/gma Â§9- Â§fChange the gamemode to Â§bÂ§lADVENTURE");
-			                     $sender->sendMessage("Â§e/gmsc Â§9- Â§fChange the gamemode to Â§bÂ§lSPECTATOR");
-			                     $sender->sendMessage("Â§e/soccer Â§9- Â§fSpawn the soccer ball, play and score Â§bGOALÂ§f!");
-			                     $sender->sendMessage("Â§e/clearinv Â§9- Â§fClear all items from inventory!");
+			                     $sender->sendMessage("§b--(§a Implactor Help §7[§e3-4§7] §b)--");
+			                     $sender->sendMessage("§e/gmc §9- §fChange the gamemode to §e§lCREATIVE");
+			                     $sender->sendMessage("§e/gma §9- §fChange the gamemode to §b§lADVENTURE");
+			                     $sender->sendMessage("§e/gmsc §9- §fChange the gamemode to §b§lSPECTATOR");
+			                     $sender->sendMessage("§e/soccer §9- §fSpawn the soccer ball, play and score §bGOAL§f!");
+			                     $sender->sendMessage("§e/clearinv §9- §fClear all items from inventory!");
 			                     break;
 			                     case "4":
-			                     $sender->sendMessage("Â§b--(Â§a Implactor Help Â§7[Â§e4-4Â§7] Â§b)--");
-			                     $sender->sendMessage("Â§e/cleararmor Â§9- Â§fClear armors from own character!");
-			                     $sender->sendMessage("Â§e/rainbow Â§9- Â§fOpen the rainbow armor menu UI!");
-			                     $sender->sendMessage("Â§e/clearbot Â§9- Â§fClear all spawned Â§bbot humansÂ§f by open a UI menu!");
+			                     $sender->sendMessage("§b--(§a Implactor Help §7[§e4-4§7] §b)--");
+			                     $sender->sendMessage("§e/cleararmor §9- §fClear armors from own character!");
+			                     $sender->sendMessage("§e/rainbow §9- §fOpen the rainbow armor menu UI!");
+			                     $sender->sendMessage("§e/clearbot §9- §fClear all spawned §bbot humans§f by open a UI menu!");
 			                     break;
 			                     }
                               }
@@ -427,7 +457,7 @@ class Implade extends PluginBase implements Listener {
 			             return false;
 			            }
 		            }else{
-			           $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+			           $sender->sendMessage("§cPlease use Implactor command in-game server!");
 			           return false;
 			        }
 			        return true;
@@ -436,19 +466,19 @@ class Implade extends PluginBase implements Listener {
         	if(strtolower($command->getName()) === "iabout"){
         	    if($sender instanceof Player){
 		            if($sender->hasPermission("implactor.command.about")){
-			            $sender->sendMessage("Â§8---=========================---");
-			            $sender->sendMessage("Â§8- Â§aImplÂ§6actor");
-			            $sender->sendMessage("Â§8- Â§cAuthor: Â§fZadezter");
-			            $sender->sendMessage("Â§8- Â§aTeam: Â§fImpladeDeveloped");
-			            $sender->sendMessage("Â§8- Â§bCreated: Â§f23 Â§eMay Â§f2018");
-		                $sender->sendMessage("Â§8- Â§dRe-created: Â§f14 Â§eJuly Â§f2018");
-			            $sender->sendMessage("Â§8---=========================---");
+			            $sender->sendMessage("§8---=========================---");
+			            $sender->sendMessage("§8- §aImpl§6actor");
+			            $sender->sendMessage("§8- §cAuthor: §fZadezter");
+			            $sender->sendMessage("§8- §aTeam: §fImpladeDeveloped");
+			            $sender->sendMessage("§8- §bCreated: §f23 §eMay §f2018");
+		                $sender->sendMessage("§8- §dRe-created: §f14 §eJuly §f2018");
+			            $sender->sendMessage("§8---=========================---");
 		             }else{
 			            $sender->sendMessage("");
 			            return false;
 			          }
 		          }else{
-			         $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+			         $sender->sendMessage("§cPlease use Implactor command in-game server!");
 			         return false;
 			      }
 			      return true;
@@ -457,13 +487,13 @@ class Implade extends PluginBase implements Listener {
         	if(strtolower($command->getName()) === "ping"){
         	    if($sender instanceof Player){
 		            if($sender->hasPermission("implactor.ping")){
-			            $sender->sendMessage($sender->getPlayer()->getName(). "Â§a's ping status: Â§7[Â§d". $sender->getPing() ."Â§emsÂ§7]");
+			            $sender->sendMessage($sender->getPlayer()->getName(). "§a's ping status: §7[§d". $sender->getPing() ."§ems§7]");
                      }else{
 			            $sender->sendMessage("");
 			             return false;
 			            }
 		            }else{
-			           $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+			           $sender->sendMessage("§cPlease use Implactor command in-game server!");
 			           return false;
                     }
                     return true;
@@ -476,15 +506,15 @@ class Implade extends PluginBase implements Listener {
                         $y = 128;
                         $z = rand(1,999);
                         $sender->teleport($sender->getLevel()->getSafeSpawn(new Vector3($x, $y, $z)));            
-			            $sender->addTitle("Â§lÂ§kÂ§a!Â§bÂ¡Â§c!Â§r Â§7Â§l[Â§eTeleportingÂ§7]Â§r Â§lÂ§kÂ§a!Â§bÂ¡Â§c!Â§r", "...");
-                        $sender->sendMessage("--------\n Â§eTeleporting to random spot\n Â§eof Â§bwilderness! \nÂ§r--------");
+			            $sender->addTitle("§l§k§a!§bÂ¡§c!§r §7§l[§eTeleporting§7]§r §l§k§a!§bÂ¡§c!§r", "...");
+                        $sender->sendMessage("--------\n §eTeleporting to random spot\n §eof §bwilderness! \n§r--------");
 			            $this->wild[$sender->getName()] = true;
                      }else{
 			            $sender->sendMessage("");
 			            return false;
 			          }
 		          }else{
-			         $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+			         $sender->sendMessage("§cPlease use Implactor command in-game server!");
 			         return false;
 			      }
                   return true;
@@ -494,14 +524,14 @@ class Implade extends PluginBase implements Listener {
         	    if($sender instanceof Player){
 		            if($sender->hasPermission("implactor.book")){
 			            $this->implactorBook($sender);
-			            $sender->sendMessage($this->impladePrefix. "Â§6You has given a Â§aBook Â§bof Â§cImplactorÂ§6!\nÂ§fRead inside the book, Â§b". $sender->getPlayer()->getName() ."Â§f!");
+			            $sender->sendMessage($this->impladePrefix. "§6You has given a §aBook §bof §cImplactor§6!\n§fRead inside the book, §b". $sender->getPlayer()->getName() ."§f!");
                         $sender->getLevel()->addSound(new Book($sender));
 		             }else{
-			            $sender->sendMessage($this->impladePrefix. "Â§cYou have no permission allowed to use Â§dBook Â§ccommandÂ§e!");
+			            $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use §dBook §ccommand§e!");
 			            return false;
 			          }
 	              }else{
-		             $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+		             $sender->sendMessage("§cPlease use Implactor command in-game server!");
 		             return false;
 		          }
 		          return true;
@@ -512,11 +542,11 @@ class Implade extends PluginBase implements Listener {
 			        if($sender->hasPermission("implactor.bot")){
 			            $this->botMenu($sender);
                      }else{
-                        $sender->sendMessage("Â§cYou have no permission allowed to use special Â§bBot Â§ccommandÂ§e!");
+                        $sender->sendMessage("§cYou have no permission allowed to use special §bBot §ccommand§e!");
 	                    return false;
 			          }
 			      }else{
-			         $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+			         $sender->sendMessage("§cPlease use Implactor command in-game server!");
 			          return false;
 			       }
 			       return true;
@@ -527,11 +557,11 @@ class Implade extends PluginBase implements Listener {
 			        if($sender->hasPermission("implactor.bot")){
 			            $this->clearAllBotMenu($sender);
                      }else{
-                        $sender->sendMessage("Â§cYou have no permission allowed to use special Â§bBot Â§ccommandÂ§e!");
+                        $sender->sendMessage("§cYou have no permission allowed to use special §bBot §ccommand§e!");
 	                    return false;
 			          }
 			      }else{
-			         $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+			         $sender->sendMessage("§cPlease use Implactor command in-game server!");
 			          return false;
 			       }
 			       return true;
@@ -542,13 +572,13 @@ class Implade extends PluginBase implements Listener {
 			       if($sender->hasPermission("implactor.soccer")){
 				       $this->soccerBall($sender, "SoccerSlime");
 				       $sender->level->broadcastLevelSoundEvent($sender, BallSoundPacket::SOUND_POP);
-				       $sender->sendMessage($this->impladePrefix. "Â§fYou have spawned a soccer ball at your coordinates! Wait a minute, that's a Â§ababy slimeÂ§f!");
+				       $sender->sendMessage($this->impladePrefix. "§fYou have spawned a soccer ball at your coordinates! Wait a minute, that's a §ababy slime§f!");
                     }else{
-                       $sender->sendMessage("Â§cYou have no permission allowed to use special Â§bBot Â§ccommandÂ§e!");
+                       $sender->sendMessage("§cYou have no permission allowed to use special §bBot §ccommand§e!");
 	                   return false;
 			         }
 			     }else{
-			        $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+			        $sender->sendMessage("§cPlease use Implactor command in-game server!");
 			        return false;
 			    }
 			    return true;
@@ -559,11 +589,11 @@ class Implade extends PluginBase implements Listener {
 		           if($sender->hasPermission("implactor.vision")){
 		                $this->visionMenu($sender);
 		             }else{
-                        $sender->sendMessage("Â§cYou have no permission allowed to use Â§ePlayer visibility Â§ccommandÂ§e!");
+                        $sender->sendMessage("§cYou have no permission allowed to use §ePlayer visibility §ccommand§e!");
                         return false;
                       }            
                   }else{
-                     $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+                     $sender->sendMessage("§cPlease use Implactor command in-game server!");
                      return false;
                   }
                   return true;
@@ -574,11 +604,11 @@ class Implade extends PluginBase implements Listener {
 		           if($sender->hasPermission("implactor.playervisibility")){
 		                $this->visibilityMenu($sender);
 		             }else{
-                        $sender->sendMessage("Â§cYou have no permission allowed to use Â§ePlayer visibility Â§ccommandÂ§e!");
+                        $sender->sendMessage("§cYou have no permission allowed to use §ePlayer visibility §ccommand§e!");
                         return false;
                       }            
                   }else{
-                     $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+                     $sender->sendMessage("§cPlease use Implactor command in-game server!");
                      return false;
                   }
                   return true;
@@ -589,11 +619,11 @@ class Implade extends PluginBase implements Listener {
 		           if($sender->hasPermission("implactor.rainbow")){
 		                $this->rainbowMenu($sender);
 		             }else{
-                        $sender->sendMessage("Â§cYou have no permission allowed to use Â§ePlayer visibility Â§ccommandÂ§e!");
+                        $sender->sendMessage("§cYou have no permission allowed to use §ePlayer visibility §ccommand§e!");
                         return false;
                       }            
                   }else{
-                     $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+                     $sender->sendMessage("§cPlease use Implactor command in-game server!");
                      return false;
                   }
                   return true;
@@ -601,25 +631,25 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "gms"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.gamemode")){
-                       $sender->sendMessage($this->impladePrefix. "Â§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
                        return false;
                      }
                      if(empty($args[0])){
                          $sender->setGamemode(Player::SURVIVAL); 
-	                     $sender->sendMessage($this->impladePrefix. "Â§aYou have changed the gamemode to Â§cÂ§lSURVIVAL");
+	                     $sender->sendMessage($this->impladePrefix. "§aYou have changed the gamemode to §c§lSURVIVAL");
                          return false;
 		               }
                        $player = $this->getServer()->getPlayer($args[0]);
                        if($this->getServer()->getPlayer($args[0])){
                            $player->setGamemode(Player::SURVIVAL);
-                           $sender->sendMessage($this->impladePrefix. "Â§aYou have successfully changed Â§f". $player->getName() . "Â§a's gamemode to Â§cÂ§lSURVIVAL");
-                           $player->sendMessage($this->impladePrefix. $sender->getName() . " Â§achanged your gamemode to Â§cÂ§lSURVIVAL");
+                           $sender->sendMessage($this->impladePrefix. "§aYou have successfully changed §f". $player->getName() . "§a's gamemode to §c§lSURVIVAL");
+                           $player->sendMessage($this->impladePrefix. $sender->getName() . " §achanged your gamemode to §c§lSURVIVAL");
                         }else{
-                           $sender->sendMessage($this->impladePrefix. "Â§cPlayer not found in-game server!");
+                           $sender->sendMessage($this->impladePrefix. "§cPlayer not found in-game server!");
                            return false;
 			        }
 			        return true;
@@ -627,25 +657,25 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "gmc"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.gamemode")){
-                       $sender->sendMessage($this->impladePrefix. "Â§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
                        return false;
                      }
                      if(empty($args[0])){
                          $sender->setGamemode(Player::CREATIVE); 
-	                     $sender->sendMessage($this->impladePrefix. "Â§aYou have changed the gamemode to Â§eÂ§lCREATIVE");
+	                     $sender->sendMessage($this->impladePrefix. "§aYou have changed the gamemode to §e§lCREATIVE");
                          return false;
 		               }
                        $player = $this->getServer()->getPlayer($args[0]);
                        if($this->getServer()->getPlayer($args[0])){
                            $player->setGamemode(Player::CREATIVE);
-                           $sender->sendMessage($this->impladePrefix. "Â§aYou have successfully changed Â§f". $player->getName() . "Â§a's gamemode to Â§eÂ§lCREATIVE");
-                           $player->sendMessage($this->impladePrefix. $sender->getName() . " Â§achanged your gamemode to Â§eÂ§lCREATIVE");
+                           $sender->sendMessage($this->impladePrefix. "§aYou have successfully changed §f". $player->getName() . "§a's gamemode to §e§lCREATIVE");
+                           $player->sendMessage($this->impladePrefix. $sender->getName() . " §achanged your gamemode to §e§lCREATIVE");
                         }else{
-                           $sender->sendMessage($this->impladePrefix. "Â§cPlayer not found in-game server!");
+                           $sender->sendMessage($this->impladePrefix. "§cPlayer not found in-game server!");
                            return false;
 			        }
 			        return true;
@@ -653,25 +683,25 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "gma"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.gamemode")){
-                       $sender->sendMessage($this->impladePrefix. "Â§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
                        return false;
                      }
                      if(empty($args[0])){
                          $sender->setGamemode(Player::ADVENTURE); 
-	                     $sender->sendMessage($this->impladePrefix. "Â§aYou have changed the gamemode to Â§bÂ§lADVENTURE");
+	                     $sender->sendMessage($this->impladePrefix. "§aYou have changed the gamemode to §b§lADVENTURE");
                          return false;
 		               }
                        $player = $this->getServer()->getPlayer($args[0]);
                        if($this->getServer()->getPlayer($args[0])){
                            $player->setGamemode(Player::ADVENTURE);
-                           $sender->sendMessage($this->impladePrefix. "Â§aYou have successfully changed Â§f". $player->getName() . "Â§a's gamemode to Â§bÂ§lADVENTURE");
-                           $player->sendMessage($this->impladePrefix. $sender->getName() . " Â§achanged your gamemode to Â§bÂ§lADVENTURE");
+                           $sender->sendMessage($this->impladePrefix. "§aYou have successfully changed §f". $player->getName() . "§a's gamemode to §b§lADVENTURE");
+                           $player->sendMessage($this->impladePrefix. $sender->getName() . " §achanged your gamemode to §b§lADVENTURE");
                         }else{
-                           $sender->sendMessage($this->impladePrefix. "Â§cPlayer not found in-game server!");
+                           $sender->sendMessage($this->impladePrefix. "§cPlayer not found in-game server!");
                            return false;
 			        }
 			        return true;
@@ -679,25 +709,25 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "gmsc"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.gamemode")){
-                       $sender->sendMessage($this->impladePrefix. "Â§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
                        return false;
                      }
                      if(empty($args[0])){
                          $sender->setGamemode(Player::SPECTATOR); 
-	                     $sender->sendMessage($this->impladePrefix. "Â§aYou have changed the gamemode to Â§7Â§lSPECTATOR");
+	                     $sender->sendMessage($this->impladePrefix. "§aYou have changed the gamemode to §7§lSPECTATOR");
                          return false;
 		               }
                        $player = $this->getServer()->getPlayer($args[0]);
                        if($this->getServer()->getPlayer($args[0])){
                            $player->setGamemode(Player::SPECTATOR);
-                           $sender->sendMessage($this->impladePrefix. "Â§aYou have successfully changed Â§f". $player->getName() . "Â§a's gamemode to Â§7Â§lSPECTATOR");
-                           $player->sendMessage($this->impladePrefix. $sender->getName() . " Â§achanged your gamemode to Â§7Â§lSPECTATOR");
+                           $sender->sendMessage($this->impladePrefix. "§aYou have successfully changed §f". $player->getName() . "§a's gamemode to §7§lSPECTATOR");
+                           $player->sendMessage($this->impladePrefix. $sender->getName() . " §achanged your gamemode to §7§lSPECTATOR");
                         }else{
-                           $sender->sendMessage($this->impladePrefix. "Â§cPlayer not found in-game server!");
+                           $sender->sendMessage($this->impladePrefix. "§cPlayer not found in-game server!");
                            return false;
 			        }
 			        return true;
@@ -705,11 +735,11 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "clearinv"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.clear")){
-                       $sender->sendMessage($this->impladePrefix. "Â§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
                        return false;
                      }
                      if(empty($args[0])){
@@ -720,10 +750,10 @@ class Implade extends PluginBase implements Listener {
                        $player = $this->getServer()->getPlayer($args[0]);
                        if($this->getServer()->getPlayer($args[0])){
                            $player->getInventory()->clearAll();
-                           $sender->sendMessage($this->impladePrefix. "Â§aYou have successfully cleared all of Â§f". $player->getName() . "Â§a's items from inventory!");
-                           $player->sendMessage($this->impladePrefix. $sender->getName() . " Â§ahas cleared all of your items from inventory!");
+                           $sender->sendMessage($this->impladePrefix. "§aYou have successfully cleared all of §f". $player->getName() . "§a's items from inventory!");
+                           $player->sendMessage($this->impladePrefix. $sender->getName() . " §ahas cleared all of your items from inventory!");
                         }else{
-                           $sender->sendMessage($this->impladePrefix. "Â§cPlayer not found in-game server!");
+                           $sender->sendMessage($this->impladePrefix. "§cPlayer not found in-game server!");
                            return false;
 			        }
 			        return true;
@@ -731,25 +761,25 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "cleararmor"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.clear")){
-                       $sender->sendMessage($this->impladePrefix. "Â§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
                        return false;
                      }
                      if(empty($args[0])){
                          $sender->getArmorInventory()->clearAll();
-	                     $sender->sendMessage($this->impladePrefix. "Â§fYou have cleared your armor gear from own character!");
+	                     $sender->sendMessage($this->impladePrefix. "§fYou have cleared your armor gear from own character!");
                          return false;
 		               }
                        $player = $this->getServer()->getPlayer($args[0]);
                        if($this->getServer()->getPlayer($args[0])){
                            $player->getArmorInventory()->clearAll();
-                           $sender->sendMessage($this->impladePrefix. "Â§fYou have successfully cleared Â§f". $player->getName() . "Â§f's armor gear from their character!");
-                           $player->sendMessage($this->impladePrefix. $sender->getName() . " Â§fhas cleared your armor gear from own character!");
+                           $sender->sendMessage($this->impladePrefix. "§fYou have successfully cleared §f". $player->getName() . "§f's armor gear from their character!");
+                           $player->sendMessage($this->impladePrefix. $sender->getName() . " §fhas cleared your armor gear from own character!");
                         }else{
-                           $sender->sendMessage($this->impladePrefix."Â§cPlayer not found in-game server!");
+                           $sender->sendMessage($this->impladePrefix."§cPlayer not found in-game server!");
                            return false;
 			        }
 			        return true;
@@ -759,16 +789,16 @@ class Implade extends PluginBase implements Listener {
         	    if($sender instanceof Player){
 		            if($sender->hasPermission("implactor.broadcast")){
 		                if(count($args) < 1){
-			                $sender->sendMessage("Â§8Â§l(Â§6!Â§8)Â§r Â§cCommand usageÂ§8:Â§rÂ§7 /icast <message>");
+			                $sender->sendMessage("§8§l(§6!§8)§r §cCommand usage§8:§r§7 /icast <message>");
 			                return false;
 			               }   
-                          $sender->getServer()->broadcastMessage("Â§7[Â§bImplacastÂ§7] Â§e" . implode(" ", $args));
+                          $sender->getServer()->broadcastMessage("§7[§bImplacast§7] §e" . implode(" ", $args));
 			           }else{
-				          $sender->sendMessage($this->impladePrefix. "Â§cYou have no permission allowed to use Â§eImplacast Â§ccommandÂ§e!");
+				          $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use §eImplacast §ccommand§e!");
 				          return false;
 			            }
 		            }else{
-			           $sender->sendMessage("Â§cPlease use Implactor command in-game server!");
+			           $sender->sendMessage("§cPlease use Implactor command in-game server!");
 		               return false;
 			     }
 			     return true;
@@ -784,24 +814,24 @@ class Implade extends PluginBase implements Listener {
                  switch($result){
                  case 0:
                  $sender->addEffect(new EffectInstance(Effect::getEffect(Effect::NIGHT_VISION), 1000000, 254, true));
-                 $sender->sendMessage($this->impladePrefix. "Â§eYou have Â§aenabled the Â§bNight Vision Â§emode!");
+                 $sender->sendMessage($this->impladePrefix. "§eYou have §aenabled the §bNight Vision §emode!");
                  break;
                  
                  case 1:
                  $sender->removeEffect(Effect::NIGHT_VISION);
-                 $sender->sendMessage($this->impladePrefix. "Â§eYou have Â§cdisabled the Â§bNight Vision Â§emode!");
+                 $sender->sendMessage($this->impladePrefix. "§eYou have §cdisabled the §bNight Vision §emode!");
                  break;
                  
                  case 2:
-                 $sender->sendMessage($this->impladePrefix. "Â§cYou have closed the vision menu UI mode!");
+                 $sender->sendMessage($this->impladePrefix. "§cYou have closed the vision menu UI mode!");
                  break;
                  }
             });
             $form->setTitle("Implactor Menu UI");
-            $form->setContent("Â§f> Â§lÂ§0Vision Mode\nÂ§rÂ§eIf you feel so dark out there, you can use vision mode here!");
-            $form->addButton("Â§aENABLE", 1, "https://cdn.discordapp.com/attachments/442624759985864714/468316317351542804/On.png");
-            $form->addButton("Â§4DISABLE", 2, "https://cdn.discordapp.com/attachments/442624759985864714/468316317351542806/Off.png");
-            $form->addButton("Â§0CLOSE", 3, "https://cdn.discordapp.com/attachments/442624759985864714/468316717169508362/Logopit_1531725791540.png");
+            $form->setContent("§f> §l§0Vision Mode\n§r§eIf you feel so dark out there, you can use vision mode here!");
+            $form->addButton("§aENABLE", 1, "https://cdn.discordapp.com/attachments/442624759985864714/468316317351542804/On.png");
+            $form->addButton("§4DISABLE", 2, "https://cdn.discordapp.com/attachments/442624759985864714/468316317351542806/Off.png");
+            $form->addButton("§0CLOSE", 3, "https://cdn.discordapp.com/attachments/442624759985864714/468316717169508362/Logopit_1531725791540.png");
             $form->sendToPlayer($sender);              
         }
         
@@ -811,12 +841,12 @@ class Implade extends PluginBase implements Listener {
 			$result = $data;
             if($result !== null){
             	$this->summonBot($sender, $result[1]);
-			    $sender->getServer()->broadcastMessage("Â§7[Â§bBotÂ§7]Â§f Â§e". $sender->getPlayer()->getName() ."Â§f has spawned a Â§bbot Â§fwith named Â§d" .$result[1]. "Â§f!");
+			    $sender->getServer()->broadcastMessage("§7[§bBot§7]§f §e". $sender->getPlayer()->getName() ."§f has spawned a §bbot §fwith named §d" .$result[1]. "§f!");
 			    $sender->getLevel()->addSound(new Bot($sender));
 			    }
 			});
 			$form->setTitle("Implactor Menu UI");
-			$form->addLabel("Â§f> Â§0Â§lBot Human\nÂ§rÂ§eSpawn the bot human by entering a name of the entity!");
+			$form->addLabel("§f> §0§lBot Human\n§r§eSpawn the bot human by entering a name of the entity!");
 			$form->addInput("Bot Name", "Zadey");
 			$form->sendToPlayer($sender);
 		}
@@ -838,18 +868,18 @@ class Implade extends PluginBase implements Listener {
                        }
                     }
                 }
-                $sender->sendMessage($this->impladePrefix. "Â§aYou have successfully cleared Â§b" .$clearBots. " Â§abot humans!");
+                $sender->sendMessage($this->impladePrefix. "§aYou have successfully cleared §b" .$clearBots. " §abot humans!");
                 break;
                
                 case 1:
-                $sender->sendMessage($this->impladePrefix. "Â§cYou have cancelled the confirmation to clear all bot humans!");
+                $sender->sendMessage($this->impladePrefix. "§cYou have cancelled the confirmation to clear all bot humans!");
                 break;
                 }
            });
            $form->setTitle("Are you sure?");
-           $form->setContent("Â§6Do you really want to clear all bot humans in this world?\nIt will reduce lagg in-game server and some operators who have just spawned will gone and taken a rage!");     
-           $form->addButton("Â§aYES", 1, "");
-           $form->addButton("Â§4NO", 2, "");
+           $form->setContent("§6Do you really want to clear all bot humans in this world?\nIt will reduce lagg in-game server and some operators who have just spawned will gone and taken a rage!");     
+           $form->addButton("§aYES", 1, "");
+           $form->addButton("§4NO", 2, "");
            $form->sendToPlayer($sender);
         }
         
@@ -861,7 +891,7 @@ class Implade extends PluginBase implements Listener {
              	}
                  switch($result){
                  case 0:
-                 $sender->addTitle("Â§7Â§l[Â§aONÂ§7]", "Â§aEnabled the player visibility!");
+                 $sender->addTitle("§7§l[§aON§7]", "§aEnabled the player visibility!");
                  unset($this->visibility[array_search($sender->getName(), $this->visibility)]);
 			     foreach($this->getServer()->getOnlinePlayers() as $visibler) {
 		         $sender->showplayer($visibler);
@@ -869,7 +899,7 @@ class Implade extends PluginBase implements Listener {
                  break;
                  
                  case 1:
-                 $sender->addTitle("Â§7Â§l[Â§cOFFÂ§7]", "Â§eDisabled the player visibility!");
+                 $sender->addTitle("§7§l[§cOFF§7]", "§eDisabled the player visibility!");
                  $this->visibility[] = $sender->getName();
 			     foreach ($this->getServer()->getOnlinePlayers() as $visibler) {
 	             $sender->hideplayer($visibler);
@@ -877,15 +907,15 @@ class Implade extends PluginBase implements Listener {
                  break;
                  
                  case 2:
-                 $sender->sendMessage($this->impladePrefix. "Â§cYou have closed the player visibility menu UI mode!");
+                 $sender->sendMessage($this->impladePrefix. "§cYou have closed the player visibility menu UI mode!");
                  break;
                  }
             });
             $form->setTitle("Implactor Menu UI");
-            $form->setContent("Â§f> Â§0Â§lPlayer Visibility\nÂ§rÂ§eWant to be alone? Don't worry, use player visibility to make all players get hide or show!");
-            $form->addButton("Â§aSHOW", 1, "https://cdn.discordapp.com/attachments/442624759985864714/468316318060249098/Show.png");
-            $form->addButton("Â§4HIDE", 2, "https://cdn.discordapp.com/attachments/442624759985864714/468316318060249099/Hide.png");
-            $form->addButton("Â§0CLOSE", 3, "https://cdn.discordapp.com/attachments/442624759985864714/468316717169508362/Logopit_1531725791540.png");
+            $form->setContent("§f> §0§lPlayer Visibility\n§r§eWant to be alone? Don't worry, use player visibility to make all players get hide or show!");
+            $form->addButton("§aSHOW", 1, "https://cdn.discordapp.com/attachments/442624759985864714/468316318060249098/Show.png");
+            $form->addButton("§4HIDE", 2, "https://cdn.discordapp.com/attachments/442624759985864714/468316318060249099/Hide.png");
+            $form->addButton("§0CLOSE", 3, "https://cdn.discordapp.com/attachments/442624759985864714/468316717169508362/Logopit_1531725791540.png");
             $form->sendToPlayer($sender);
         }
         public function rainbowMenu($sender): void{
@@ -899,7 +929,7 @@ class Implade extends PluginBase implements Listener {
                  if($this->rainbows[$sender->getName()] === 0){
                     $rainbowStartTask = new RainbowArmorTask($this, $sender);
                     $this->getScheduler()->scheduleRepeatingTask($rainbowStartTask, 5);
-                    $sender->sendMessage($this->impladePrefix. "Â§aYou have enabled the rainbow armor!");
+                    $sender->sendMessage($this->impladePrefix. "§aYou have enabled the rainbow armor!");
 		         }
                  break;
                  
@@ -909,20 +939,20 @@ class Implade extends PluginBase implements Listener {
                     $this->getScheduler()->cancelTask($rainbowCancelTask);
                     $this->rainbows[$sender->getName()] = 0;
                     $sender->getArmorInventory()->clearAll();
-                    $sender->sendMessage($this->impladePrefix. "Â§cYou have disabled the rainbow armor!");
+                    $sender->sendMessage($this->impladePrefix. "§cYou have disabled the rainbow armor!");
                  }           
                  break;
                  
                  case 2:
-                 $sender->sendMessage($this->impladePrefix. "Â§cYou have closed the rainbow armor menu UI mode!");
+                 $sender->sendMessage($this->impladePrefix. "§cYou have closed the rainbow armor menu UI mode!");
                  break;
                  }
             });
             $form->setTitle("Implactor Menu UI");
-            $form->setContent("Â§f> Â§lÂ§0Rainbow Armor\nÂ§rÂ§eOnly for operators! Get a rainbow from your armor with using this mode!");
-            $form->addButton("Â§aENABLE", 1, ""); // making new images.
-            $form->addButton("Â§4DISABLE", 2, ""); // making new images.
-            $form->addButton("Â§0CLOSE", 3, "https://cdn.discordapp.com/attachments/442624759985864714/468316717169508362/Logopit_1531725791540.png");
+            $form->setContent("§f> §l§0Rainbow Armor\n§r§eOnly for operators! Get a rainbow from your armor with using this mode!");
+            $form->addButton("§aENABLE", 1, ""); // making new images.
+            $form->addButton("§4DISABLE", 2, ""); // making new images.
+            $form->addButton("§0CLOSE", 3, "https://cdn.discordapp.com/attachments/442624759985864714/468316717169508362/Logopit_1531725791540.png");
             $form->sendToPlayer($sender);
         }
         
