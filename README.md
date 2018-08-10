@@ -14,8 +14,8 @@ It is free to use, copyleft license for software and other<br>
 kinds of works.
 
 ### Permissions
-A good plugin developer, [FreeGamingHere](http://github.com/FreeGamingHere) has gave us a permissions to added his codes<br>
-to Implactor by making a improvements and combined!<br>
+A good plugin developer, [FreeGamingHere](http://github.com/FreeGamingHere) has gave us a permissions<br>
+to added his codes to Implactor by making a improvements and combined!<br>
 It is currently now authorized from plugin developers.
 
 ### Credits
