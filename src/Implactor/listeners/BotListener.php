@@ -33,9 +33,7 @@ use pocketmine\network\mcpe\protocol\{
 use pocketmine\event\entity\{
 	EntitySpawnEvent, EntityDamageEvent, EntityDamageByEntityEvent
 };
-use pocketmine\entity\{
-	Entity, Effect, EffectInstance
-};
+use pocketmine\entity\Entity;
 use pocketmine\Player;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\Listener;
@@ -68,9 +66,7 @@ class BotListener implements Listener {
 					$packetSwing->entityRuntimeId = $entity->getId();
 					$packetSwing->action = SwingPacket::ACTION_SWING_ARM;
 					$damager->sendDataPacket($packetSwing);
-					$effectdamager = new EffectInstance(Effect::getEffect(Effect::WEAKNESS), 9, 2, true);
-					$effectdamager = new EffectInstance(Effect::getEffect(Effect::WEAKNESS), 9, 2, true);
-					$damager->addEffect($effectdamager);
+					$damager->sendMessage("§7[§bBot§7]§e You cannot hit me. I'm invincible!");
 				}
 		  }
 	}
