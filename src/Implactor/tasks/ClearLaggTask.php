@@ -40,6 +40,6 @@ class ClearLaggTask extends Task {
     public function onRun(int $currentTick) : void{
             $this->plugin->clearItems();
             $this->plugin->clearMobs();
-            $this->plugin->getServer()->broadcastMessage($this->getLang("clear-lagg-message")); 
+            $this->plugin->getServer()->broadcastMessage($this->plugin->getLang("clear-lagg-message")); 
 	    }
     }
