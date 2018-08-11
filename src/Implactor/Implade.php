@@ -186,8 +186,7 @@ class Implade extends PluginBase implements Listener {
             if(!is_file($this->getDataFolder()."languages/{$this->config->get('language')}.yml")){ 
                 $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/English.yml", ImpladeConfig::YAML); 
                 $this->getLogger()->info("[English] Selected language to English!"); 
-            }
-            if(!is_file($this->getDataFolder() . "languages/{$this->config->get('Language') }.yml")){
+              }else{
                 $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/Malay.yml", ImpladeConfig::YAML);
                 $this->getLogger()->info("[Malay] Bahasa Melayu telah dipilih!");
               }else{ 
