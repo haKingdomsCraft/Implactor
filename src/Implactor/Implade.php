@@ -1005,6 +1005,11 @@ class Implade extends PluginBase implements Listener {
             }
             return $mobs;
         }
+	
+        public function getLang($configKey){
+                $lang = $this->lang;
+                return str_replace("§", "§", $lang->get($configKey));
+        }
         
         public function exemptEntity(Entity $entity): void{
         	$this->exemptedEntities[$entity->getID()] = $entity;
