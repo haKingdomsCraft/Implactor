@@ -48,7 +48,7 @@ class AntiSwearing implements Listener {
         }else{
             foreach($this->badwords as $badwords){
                 if(strpos($msg, $badwords) !== false){
-                    $player->sendMessage("§l§8(§6!§8)§r §6Do not swearing a bad words on this server!");
+                    $player->sendMessage($this->getLang("anti-swearing-message"));
                     $ev->setCancelled();
                     return;
                 }
