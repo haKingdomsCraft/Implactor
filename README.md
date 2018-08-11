@@ -1,7 +1,7 @@
 ![start2](https://cdn.discordapp.com/attachments/442624759985864714/454906888472231946/ReadMD.png)
 
-| Poggit | Hit Counts | License | Travis |
-| :-----: | :-----: | :-----: | :-----:
+| Poggit | Hit Counts | License |
+| :-----: | :-----: | :-----: |
 [![Poggit-CI](https://poggit.pmmp.io/ci.badge/ImpladeDeveloped/Implactor/Implactor/Implade)](https://poggit.pmmp.io/ci/ImpladeDeveloped/Implactor) | [![HitCount](http://hits.dwyl.io/ImpladeDeveloped/Implactor.svg)](http://hits.dwyl.io/ImpladeDeveloped/Implactor) | [![Implactor License](https://img.shields.io/github/license/ImpladeDeveloped/Implactor.svg?label=License)](LICENSE)
 
 ## Implactor
