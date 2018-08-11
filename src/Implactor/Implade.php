@@ -173,7 +173,7 @@ class Implade extends PluginBase implements Listener {
             if(!is_file($this->getDataFolder()."iConfig.yml")){ 
                  $this->saveResource("iConfig.yml"); 
             } 
-            $this->config = new ImpladeConfig($this->getDataFolder(). "iConfig.yml", Config::YAML);
+            $this->config = new ImpladeConfig($this->getDataFolder(). "iConfig.yml", ImpladeConfig::YAML);
             if(!file_exists($this->getDataFolder()."languages/")){ 
                 @mkdir($this->getDataFolder()."languages/"); 
             } 
@@ -184,14 +184,14 @@ class Implade extends PluginBase implements Listener {
                 $this->saveResource("languages/Malay.yml");
             }
             if(!is_file($this->getDataFolder()."languages/{$this->config->get('language')}.yml")){ 
-                $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/English.yml", Config::YAML); 
+                $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/English.yml", ImpladeConfig::YAML); 
                 $this->getLogger()->info("[English] Selected language to English!"); 
             }
             if(!is_file($this->getDataFolder() . "languages/{$this->config->get('Language') }.yml")){
-                $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/Malay.yml", Config::YAML);
+                $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/Malay.yml", ImpladeConfig::YAML);
                 $this->getLogger()->info("[Malay] Bahasa Melayu telah dipilih!");
               }else{ 
-                $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/{$this->config->get('language')}.yml", Config::YAML); 
+                $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/{$this->config->get('language')}.yml", ImpladeConfig::YAML); 
                 $this->getLogger()->info("Successfully selected language to {$this->config->get('language')} on Implactor!"); 
 	    }
         }  	
