@@ -803,6 +803,12 @@ class Implade extends PluginBase implements Listener {
 			     return true;
              }
         }
+	
+        public function getLang($configKey){
+                $lang = $this->lang;     
+                $langKey = $lang->get($configKey);
+                return str_replace("&", "§", $langKey);
+        }
         
         public function visionMenu($sender): void{
         	$api = $this->getServer()->getPluginManager()->getPlugin("FormAPI");
@@ -1003,11 +1009,6 @@ class Implade extends PluginBase implements Listener {
             return $mobs;
         }
 	
-        public function getLang($configKey){
-                $lang = $this->lang;
-                return str_replace("§", "§", $lang->get($configKey));
-        }
-        
         public function exemptEntity(Entity $entity): void{
         	$this->exemptedEntities[$entity->getID()] = $entity;
         }
