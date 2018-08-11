@@ -217,7 +217,7 @@ class Implade extends PluginBase implements Listener {
         
         public function onJoin(PlayerJoinEvent $ev): void{
         	$player = $ev->getPlayer();
-            $player->sendMessage($this->impladePrefix. $this->getLang("join-message-notice"));
+            $player->sendMessage($this->impladePrefix. $this->getLang("join-notice-message"));
             $player->setGamemode(Player::SURVIVAL);
 	        $this->getScheduler()->scheduleDelayedTask(new GuardianJoinTask($this, $player), 25);
 	      if($player->isOP()){
