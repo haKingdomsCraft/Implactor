@@ -118,7 +118,7 @@ class Implade extends PluginBase implements Listener {
 		$this->getLogger()->info("Implactor is currently now online! Thanks for using this plugin!");
 		$this->getScheduler()->scheduleRepeatingTask(new SpawnParticles($this, $this), 15);
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
-		$this->configLanguage();
+		$this->configLanguages();
 		$this->getLogger()->info("Implactor is licensed under GNU General Public License v3.0");
 		$this->checkDepends();
 		$this->checkTridents();      
@@ -166,7 +166,7 @@ class Implade extends PluginBase implements Listener {
              }
         }
 
-        public function configLanguage() { 
+        public function configLanguages(){ 
             if(!file_exists($this->getDataFolder())){ 
                 @mkdir($this->getDataFolder()); 
             } 
@@ -177,21 +177,20 @@ class Implade extends PluginBase implements Listener {
             if(!file_exists($this->getDataFolder()."languages/")){ 
                 @mkdir($this->getDataFolder()."languages/"); 
             } 
-            if(!is_file($this->getDataFolder()."languages/English.yml")){ 
+            if(!is_file($this->getDataFolder(). "languages/English.yml")){ 
                 $this->saveResource("languages/English.yml"); 
             } 
-            if(!is_file($this->getDataFolder() . "languages/Malay.yml")) {
+            if(!is_file($this->getDataFolder(). "languages/Malay.yml")){
                 $this->saveResource("languages/Malay.yml");
             }
             if(!is_file($this->getDataFolder()."languages/{$this->config->get('language')}.yml")){ 
                 $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/English.yml", Config::YAML); 
                 $this->getLogger()->info("[English] Selected language to English!"); 
             }
-            if(!is_file($this->getDataFolder() . "languages/{$this->config->get('Language') }.yml")) {
+            if(!is_file($this->getDataFolder() . "languages/{$this->config->get('Language') }.yml")){
                 $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/Malay.yml", Config::YAML);
                 $this->getLogger()->info("[Malay] Bahasa Melayu telah dipilih!");
-               }
-            }else{ 
+              }else{ 
                 $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/{$this->config->get('language')}.yml", Config::YAML); 
                 $this->getLogger()->info("Successfully selected language to {$this->config->get('language')} on Implactor!"); 
         }  	
