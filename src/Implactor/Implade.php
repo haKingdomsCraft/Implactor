@@ -453,11 +453,11 @@ class Implade extends PluginBase implements Listener {
                               }
 		                  }
                       }else{
-			             $sender->sendMessage("");
+			             $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
 			             return false;
 			            }
 		            }else{
-			           $sender->sendMessage("§cPlease use Implactor command in-game server!");
+			           $sender->sendMessage($this->getLang("only-command-ingame-message"));
 			           return false;
 			        }
 			        return true;
@@ -474,11 +474,11 @@ class Implade extends PluginBase implements Listener {
 		                $sender->sendMessage("§8- §dRe-created: §f14 §eJuly §f2018");
 			            $sender->sendMessage("§8---=========================---");
 		             }else{
-			            $sender->sendMessage("");
+			            $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
 			            return false;
 			          }
 		          }else{
-			         $sender->sendMessage("§cPlease use Implactor command in-game server!");
+			         $sender->sendMessage($this->getLang("only-command-ingame-message"));
 			         return false;
 			      }
 			      return true;
@@ -489,11 +489,11 @@ class Implade extends PluginBase implements Listener {
 		            if($sender->hasPermission("implactor.ping")){
 			            $sender->sendMessage($sender->getPlayer()->getName(). "§a's ping status: §7[§d". $sender->getPing() ."§ems§7]");
                      }else{
-			            $sender->sendMessage("");
+			            $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
 			             return false;
 			            }
 		            }else{
-			           $sender->sendMessage("§cPlease use Implactor command in-game server!");
+			           $sender->sendMessage($this->getLang("only-command-ingame-message"));
 			           return false;
                     }
                     return true;
@@ -510,11 +510,11 @@ class Implade extends PluginBase implements Listener {
                         $sender->sendMessage("--------\n §eTeleporting to random spot\n §eof §bwilderness! \n§r--------");
 			            $this->wild[$sender->getName()] = true;
                      }else{
-			            $sender->sendMessage("");
+			            $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
 			            return false;
 			          }
 		          }else{
-			         $sender->sendMessage("§cPlease use Implactor command in-game server!");
+			         $sender->sendMessage($this->getLang("only-command-ingame-message"));
 			         return false;
 			      }
                   return true;
@@ -527,11 +527,11 @@ class Implade extends PluginBase implements Listener {
 			            $sender->sendMessage($this->impladePrefix. "§6You has given a §aBook §bof §cImplactor§6!\n§fRead inside the book, §b". $sender->getPlayer()->getName() ."§f!");
                         $sender->getLevel()->addSound(new Book($sender));
 		             }else{
-			            $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use §dBook §ccommand§e!");
+			            $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
 			            return false;
 			          }
 	              }else{
-		             $sender->sendMessage("§cPlease use Implactor command in-game server!");
+		             $sender->sendMessage($this->getLang("only-command-ingame-message"));
 		             return false;
 		          }
 		          return true;
@@ -542,11 +542,11 @@ class Implade extends PluginBase implements Listener {
 			        if($sender->hasPermission("implactor.bot")){
 			            $this->botMenu($sender);
                      }else{
-                        $sender->sendMessage("§cYou have no permission allowed to use special §bBot §ccommand§e!");
+                        $sender->sendMessage($this->getLang("no-permission-message"));
 	                    return false;
 			          }
 			      }else{
-			         $sender->sendMessage("§cPlease use Implactor command in-game server!");
+			         $sender->sendMessage($this->getLang("only-command-ingame-message"));
 			          return false;
 			       }
 			       return true;
@@ -557,11 +557,11 @@ class Implade extends PluginBase implements Listener {
 			        if($sender->hasPermission("implactor.bot")){
 			            $this->clearAllBotMenu($sender);
                      }else{
-                        $sender->sendMessage("§cYou have no permission allowed to use special §bBot §ccommand§e!");
+                        $sender->sendMessage($this->getLang("no-permission-message"));
 	                    return false;
 			          }
 			      }else{
-			         $sender->sendMessage("§cPlease use Implactor command in-game server!");
+			         $sender->sendMessage($this->getLang("only-command-ingame-message"));
 			          return false;
 			       }
 			       return true;
@@ -574,11 +574,11 @@ class Implade extends PluginBase implements Listener {
 				       $sender->level->broadcastLevelSoundEvent($sender, BallSoundPacket::SOUND_POP);
 				       $sender->sendMessage($this->impladePrefix. "§fYou have spawned a soccer ball at your coordinates! Wait a minute, that's a §ababy slime§f!");
                     }else{
-                       $sender->sendMessage("§cYou have no permission allowed to use special §bBot §ccommand§e!");
+                       $sender->sendMessage($this->getLang("no-permission-message"));
 	                   return false;
 			         }
 			     }else{
-			        $sender->sendMessage("§cPlease use Implactor command in-game server!");
+			        $sender->sendMessage($this->getLang("only-command-ingame-message"));
 			        return false;
 			    }
 			    return true;
@@ -589,11 +589,11 @@ class Implade extends PluginBase implements Listener {
 		           if($sender->hasPermission("implactor.vision")){
 		                $this->visionMenu($sender);
 		             }else{
-                        $sender->sendMessage("§cYou have no permission allowed to use §ePlayer visibility §ccommand§e!");
+                        $sender->sendMessage($this->getLang("no-permission-message"));
                         return false;
                       }            
                   }else{
-                     $sender->sendMessage("§cPlease use Implactor command in-game server!");
+                     $sender->sendMessage($this->getLang("only-command-ingame-message"));
                      return false;
                   }
                   return true;
@@ -604,11 +604,11 @@ class Implade extends PluginBase implements Listener {
 		           if($sender->hasPermission("implactor.playervisibility")){
 		                $this->visibilityMenu($sender);
 		             }else{
-                        $sender->sendMessage("§cYou have no permission allowed to use §ePlayer visibility §ccommand§e!");
+                        $sender->sendMessage($this->getLang("no-permission-message"));
                         return false;
                       }            
                   }else{
-                     $sender->sendMessage("§cPlease use Implactor command in-game server!");
+                     $sender->sendMessage($this->getLang("only-command-ingame-message"));
                      return false;
                   }
                   return true;
@@ -619,11 +619,11 @@ class Implade extends PluginBase implements Listener {
 		           if($sender->hasPermission("implactor.rainbow")){
 		                $this->rainbowMenu($sender);
 		             }else{
-                        $sender->sendMessage("§cYou have no permission allowed to use §ePlayer visibility §ccommand§e!");
+                        $sender->sendMessage($this->getLang("no-permission-message"));
                         return false;
                       }            
                   }else{
-                     $sender->sendMessage("§cPlease use Implactor command in-game server!");
+                     $sender->sendMessage($this->getLang("only-command-ingame-message"));
                      return false;
                   }
                   return true;
@@ -631,11 +631,11 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "gms"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage($this->getLang("only-command-ingame-message"));
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.gamemode")){
-                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
                        return false;
                      }
                      if(empty($args[0])){
@@ -657,11 +657,11 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "gmc"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage($this->getLang("only-command-ingame-message"));
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.gamemode")){
-                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
                        return false;
                      }
                      if(empty($args[0])){
@@ -683,11 +683,11 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "gma"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage($this->getLang("only-command-ingame-message"));
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.gamemode")){
-                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
                        return false;
                      }
                      if(empty($args[0])){
@@ -709,11 +709,11 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "gmsc"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage($this->getLang("only-command-ingame-message"));
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.gamemode")){
-                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
                        return false;
                      }
                      if(empty($args[0])){
@@ -735,11 +735,11 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "clearinv"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage($this->getLang("only-command-ingame-message"));
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.clear")){
-                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
                        return false;
                      }
                      if(empty($args[0])){
@@ -761,11 +761,11 @@ class Implade extends PluginBase implements Listener {
         
         	if(strtolower($command->getName()) === "cleararmor"){
         	    if(!$sender instanceof Player){
-                    $sender->sendMessage("§cPlease use Implactor command in-game server!");
+                    $sender->sendMessage($this->getLang("only-command-ingame-message"));
                      return false;
                    }
                    if(!$sender->hasPermission("implactor.clear")){
-                       $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use this command!");
+                       $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
                        return false;
                      }
                      if(empty($args[0])){
@@ -794,11 +794,11 @@ class Implade extends PluginBase implements Listener {
 			               }   
                           $sender->getServer()->broadcastMessage("§7[§bImplacast§7] §e" . implode(" ", $args));
 			           }else{
-				          $sender->sendMessage($this->impladePrefix. "§cYou have no permission allowed to use §eImplacast §ccommand§e!");
+				          $sender->sendMessage($this->impladePrefix. $this->getLang("no-permission-message"));
 				          return false;
 			            }
 		            }else{
-			           $sender->sendMessage("§cPlease use Implactor command in-game server!");
+			           $sender->sendMessage($this->getLang("only-command-ingame-message"));
 		               return false;
 			     }
 			     return true;
