@@ -37,9 +37,10 @@ bot-no-hit-damage-message: "§eYou cannot hit me. I'm invincible!"
 fly-disable-damage-message: "§cYour fly mode have been disabled because you suffered damaged!"
 
 # Tips:
-# "respawn-title"
-# Example Message: "{title}", "{subtitle}"
-respawn-title: "§l§cYOU ARE DEAD", "§fOuch, what just happend?"
+# "respawn-title" = Title screen message
+# "respawn-subtitle" = Subtitle screen message
+respawn-title: "§l§cYOU ARE DEAD"
+respawn-subtitle: "§fOuch, what just happend?"
 
 # Commands
 no-permission-message: "§cYou have no permission allowed to use the command!"
