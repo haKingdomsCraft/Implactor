@@ -2,7 +2,7 @@
 
 | Poggit | Hit Counts | License | Travis |
 | :-----: | :-----: | :-----: | :-----:
-[![Poggit-CI](https://poggit.pmmp.io/ci.badge/ImpladeDeveloped/Implactor/Implactor/Implade)](https://poggit.pmmp.io/ci/ImpladeDeveloped/Implactor) | [![HitCount](http://hits.dwyl.io/ImpladeDeveloped/Implactor.svg)](http://hits.dwyl.io/ImpladeDeveloped/Implactor) | [![Implactor License](https://img.shields.io/github/license/ImpladeDeveloped/Implactor.svg?label=License)](LICENSE) | ![Travis-CI](https://travis-ci.org/ImpladeDeveloped/Implactor.svg?branch=Implade)
+[![Poggit-CI](https://poggit.pmmp.io/ci.badge/ImpladeDeveloped/Implactor/Implactor/Implade)](https://poggit.pmmp.io/ci/ImpladeDeveloped/Implactor) | [![HitCount](http://hits.dwyl.io/ImpladeDeveloped/Implactor.svg)](http://hits.dwyl.io/ImpladeDeveloped/Implactor) | [![Implactor License](https://img.shields.io/github/license/ImpladeDeveloped/Implactor.svg?label=License)](LICENSE)
 
 ## Implactor
 A [PocketMine](http://github.com/pmmp/PocketMine-MP) plugin as a cool classic core<br>
