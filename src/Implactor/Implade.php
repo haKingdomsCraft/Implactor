@@ -194,8 +194,7 @@ class Implade extends PluginBase implements Listener {
             }else{ 
                 $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/{$this->config->get('language')}.yml", Config::YAML); 
                 $this->getLogger()->info("Successfully selected language to {$this->config->get('language')} on Implactor!"); 
-             } 
-        }   	
+        }  	
         
         public function onDisable(): void{
         	$this->getLogger()->notice("Oh no, Implactor has self-destructed it's system and now finally closed!");
