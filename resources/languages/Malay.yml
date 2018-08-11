@@ -37,9 +37,10 @@ bot-no-hit-damage-message: "§eAnda tidak boleh pukul saya! Saya adalah keras!"
 fly-disable-damage-message: "§cMod terbang anda telah dilumpuhkan kerana anda mengalami kesakitan!"
 
 # Tips:
-# "respawn-title"
-# Contoh Mesej: "{tajuk}", "{sarikata}"
-respawn-title: "§l§cANDA TELAH MATI", "§fAduh, apa yang berlaku?"
+# "respawn-title" = Skrin Tajuk Mesej
+# "respawn-subtitle" = Skrin Sarikata Mesej
+respawn-title: "§l§cANDA TELAH MATI"
+respawn-subtitle: "§fAduh, apa yang berlaku?"
 
 # Perintah
 no-permission-message: "§cAnda tidak ada kebenaran untuk menggunakan perintah itu!"
