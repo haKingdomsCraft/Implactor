@@ -289,8 +289,8 @@ class Implade extends PluginBase implements Listener {
 	public function onRespawn(PlayerRespawnEvent $ev): void{
 		$player = $ev->getPlayer();
 		$player->setGamemode(Player::SURVIVAL);
-                $title = $this->getLang("respawn-title"));
-                $subtitle = $this->getLang("respawn-subtitle"));
+                $title = $this->getLang("respawn-title");
+                $subtitle = $this->getLang("respawn-subtitle");
 		$player->addTitle($title, $subtitle);
 		$this->getScheduler()->scheduleDelayedTask(new TotemRespawnTask($this, $player), 1);
 	}
