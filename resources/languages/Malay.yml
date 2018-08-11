@@ -42,7 +42,9 @@ fly-disable-damage-message: "§cMod terbang anda telah dilumpuhkan kerana anda m
 respawn-title: "§l§cANDA TELAH MATI", "§fAduh, apa yang berlaku?"
 
 # Perintah
-# Akan Datang
+no-permission-message: "§cAnda tidak ada kebenaran untuk menggunakan perintah itu!"
+only-command-ingame-message: "Sila gunakan perintah dalam permainan pelayan!"
 # Ia akan mengambil masa yang banyak untuk letak segalanya.
+# Akan Datang
 
 ...
