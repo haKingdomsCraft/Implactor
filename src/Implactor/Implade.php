@@ -183,6 +183,9 @@ class Implade extends PluginBase implements Listener {
             if(!is_file($this->getDataFolder(). "languages/Malay.yml")){
                 $this->saveResource("languages/Malay.yml");
             }
+            if(!is_file($this->getDataFolder(). "languages/Espanish.yml")){
+                $this->saveResource("languages/Espanish.yml");
+            }
             if(!is_file($this->getDataFolder(). "languages/{$this->config->get('language')}.yml")){ 
                 $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/English.yml", ImpladeConfig::YAML); 
                 $this->getLogger()->info("[English] Selected language to English!"); 
@@ -191,6 +194,10 @@ class Implade extends PluginBase implements Listener {
 	        $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/Malay.yml", ImpladeConfig::YAML); 
                 $this->getLogger()->info("[Malay] Bahasa Melayu telah dipilih!"); 
 	    }
+            if(!is_file($this->getDataFolder(). "languages/{$this->config->get("language")}.yml")){
+                $this->lang = new ImpladeConfig($this->getDataFolder(). "languages/Espanish.yml", ImpladeConfig::YAML);
+                $this->getLogger()->info("[Espanish] Idioma seleccionado Espanish!");
+            }
         }  	
         
         public function onDisable(): void{
