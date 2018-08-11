@@ -48,7 +48,7 @@ class AntiAdvertising implements Listener {
          }else{
             foreach($this->links as $links){
                 if(strpos($msg, $links) !== false){
-                    $player->sendMessage($this->getLang("anti-advertising-message"));
+                    $player->sendMessage($this->plugin->getLang("anti-advertising-message"));
                     $ev->setCancelled();
                     return;
                 }
