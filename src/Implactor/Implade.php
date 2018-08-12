@@ -253,11 +253,11 @@ class Implade extends PluginBase implements Listener {
             	if($player->getLastDamageCause()->getDamager() instanceof Player){
             	     $playerKiller = $player->getLastDamageCause()->getDamager();
                      $weaponKiller = $playerKiller->getInventory()->getItemInHand()->getName();
-                     if(!EconomyAPI::getInstance()->addMoney($playerKiller, 250)){
+                     if(!EconomyAPI::getInstance()->addMoney($playerKiller, 220)){
                          $this->getLogger()->error("There was a error problem with EconomyAPI! It failed to add money to the killer!");
                          return;
                         }
-                         $message = str_replace("×MONEY×", 250, $this->getLang("death-money-message"));
+                         $message = str_replace("×MONEY×", 220, $this->getLang("death-money-message"));
                          $message = str_replace("×INNOCENT×", $player->getName(), $message);
                          $message = str_replace("×KILLER×", $playerKiller->getName(), $message);
                          $message = str_replace("×WEAPON×", $weaponKiller, $message);
@@ -412,6 +412,7 @@ class Implade extends PluginBase implements Listener {
 		$ibook->setPageText(5, "§3Get a dangerous item from the sea. For staff who work on other servers, you can do some challanges and events for your players!\n\n§5- Zadezter\n§2P.S: Be a holder of Mysterious Legendary Trident and slain all opponents!");
 		$ibook->setPageText(6, "§bSoccer\n§2A sports and fun feature that you can kick a ball!\n\n§7A games for fun to play the soccer games! Whenever you do is, type /soccer in chat to spawn the, baby slime?! And let's go to get score §5GOAL§7!!!");
 		$ibook->setPageText(7, "§dRainbow Armor\n§2You can use /rainbow UI command to enable or disable your rainbow armor. It keep active when you re-joined the server!");
+                $ibook->setPageText(8, "§5Languages\n§2A configuration for langauges has been added to Implactor. This is good for players from any country using this plugin. Suggest a language on our ImpladeDeveloped team on Github.");
 		$ibook->setAuthor("§l§eZadezter");
 		$player->getInventory()->addItem($ibook);
         }
@@ -889,7 +890,7 @@ class Implade extends PluginBase implements Listener {
                 }
            });
            $form->setTitle("Are you sure?");
-           $form->setContent("§6Do you really want to clear all bot humans in this world?\nIt will reduce lagg in-game server and some operators who have just spawned will gone and taken a rage!");     
+           $form->setContent("§6Do you really want to clear all bot humans in this world?\nThis will reduce lagg in-game server and some operators who have just spawned will gone and disappeared!");     
            $form->addButton("§aYES", 1, "");
            $form->addButton("§4NO", 2, "");
            $form->sendToPlayer($sender);
